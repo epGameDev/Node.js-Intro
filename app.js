@@ -2,7 +2,7 @@ const http = require("http");
 const fs = require("fs");
 
 function requestListener(request, response) {
-    console.log("URL:", request.url, "Method: ", request.method, "Headers: ", request.headers);
+    // console.log("URL:", request.url, "Method: ", request.method, "Headers: ", request.headers);
 
     const url = request.url;
     const method = request.method;
@@ -25,16 +25,17 @@ function requestListener(request, response) {
             reqBody.push(chunk);
         });
 
-        request.on("end", () => {
+        return request.on("end", () => {
             // grabs packets and concats them to text.
             const parsedBody = Buffer.concat(reqBody).toString();
             const message = parsedBody.split('=')[1];
-            fs.writeFileSync("message.txt", message);
-            response.statusCode = 302;
-            response.setHeader('Location', '/');
-            return response.end();
-        })
 
+            fs.writeFile("message.txt", message, error => {
+                response.statusCode = 302;
+                response.setHeader('Location', '/');
+                return response.end();   
+            });
+        })
     }
 
     // Sending a responce.
